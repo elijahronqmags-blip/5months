@@ -13,7 +13,7 @@
   no config object) — it's lighter to run, especially on phones.
   To change anything, just edit the text/markup in place:
 
-  1. TEXT: All names, letter text, and the 5 roadmap items are
+  1. TEXT: All names, letter text, and the roadmap items are
      written directly in the HTML below. Search for the text
      you want to change and edit it there.
 
@@ -22,7 +22,8 @@
      folder as this HTML file, named to match. Until you do, a
      soft placeholder icon/frame shows instead — the page won't
      break. Roadmap photos also try a .png fallback automatically
-     if the .jpg isn't found.
+     if the .jpg isn't found. Slide 3 works the same way with
+     photo-1.jpg / photo-2.jpg.
 
   3. The only JavaScript left is what actually needs to run live:
      slide navigation, the envelope-opening animation, and the
@@ -44,6 +45,23 @@
       slide itself had no way to scroll to reveal it. Fixed by
       letting each slide scroll (overflow-y:auto) and removing the
       vh-based height caps that were eating all the space.
+
+  Slide 3 (the new "Same Sky, Different Window" distance page)
+  follows the exact same rules so it behaves on iPhone too: its
+  SVG path scales with width:100% instead of a fixed px size, the
+  polaroids wrap onto a second row on narrow screens instead of
+  overflowing, and font sizes use clamp() so nothing gets huge on
+  small viewports.
+
+  ------------------------------------------------------------
+  CLOSING HUG IMAGE (SLIDE 5) — UPDATED
+  ------------------------------------------------------------
+  This used to try a hug.mp4 video first and fall back to hug.gif,
+  but the fallback logic was unreliable (a missing video file
+  doesn't always fire a JS error event), so the gif never showed
+  even though it existed. It's now simplified to just show
+  hug.gif directly — put a file named "hug.gif" next to this
+  HTML file and it will display.
   ============================================================
 -->
 
@@ -315,6 +333,68 @@
   }
 
   /* ============================================================
+     SLIDE 3 — SAME SKY, DIFFERENT WINDOW (distance card)
+     ============================================================ */
+  .distance-card{
+    width:min(560px, 92vw); background:rgba(46,24,32,0.55);
+    border:1px solid rgba(238,233,220,0.12);
+    border-radius:var(--radius-lg); padding:26px 20px 24px;
+    box-shadow:var(--shadow-soft); backdrop-filter:blur(4px);
+  }
+  .sky-path{
+    position:relative; width:100%; max-width:440px; margin:0 auto 4px;
+  }
+  .sky-path svg{width:100%; height:auto; display:block; overflow:visible;}
+  .city-row{
+    display:flex; justify-content:space-between; align-items:center;
+    max-width:440px; margin:2px auto 0; padding:0 4px;
+  }
+  .city-label{
+    font-family:var(--sans); font-size:clamp(11px, 3.2vw, 13px); font-weight:600;
+    color:var(--text-light); letter-spacing:0.02em;
+  }
+  .distance-number{
+    font-family:var(--serif); text-align:center; color:var(--amber);
+    font-size:clamp(26px, 7.5vw, 38px); margin:18px 0 4px; font-weight:600;
+  }
+  .distance-sub{
+    text-align:center; font-size:13px; color:var(--text-dim);
+    margin:0 auto 16px; max-width:340px; line-height:1.6;
+  }
+  .moon-line{
+    text-align:center; font-family:var(--hand); font-size:clamp(15px, 4vw, 17px);
+    color:var(--rose); margin:0 0 22px;
+  }
+  .polaroids{
+    display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
+  }
+  .polaroid{
+    width:130px; max-width:38vw; background:var(--paper); border-radius:6px;
+    padding:8px 8px 12px; box-shadow:0 8px 18px rgba(0,0,0,0.3);
+    transform:rotate(-2deg);
+  }
+  .polaroid:nth-child(2){transform:rotate(2deg);}
+  .polaroid-photo{
+    width:100%; aspect-ratio:1/1; border-radius:3px; overflow:hidden;
+    background:linear-gradient(135deg, #d8cfc0, #efe7d8);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .polaroid-photo img{width:100%; height:100%; object-fit:cover; display:block;}
+  .polaroid-photo .pl-fallback{
+    font-size:11px; color:var(--ink-soft); text-align:center; padding:6px;
+    font-family:var(--sans); line-height:1.4;
+  }
+  .polaroid-cap{
+    font-family:var(--hand); font-size:13px; color:var(--ink-soft);
+    text-align:center; margin-top:6px;
+  }
+
+  @media (max-width:360px){
+    .distance-card{padding:20px 14px 18px;}
+    .polaroid{width:110px;}
+  }
+
+  /* ============================================================
      SLIDE 4 — LETTER + FLOWER CARD
      ============================================================ */
   .letter-scene{
@@ -327,11 +407,35 @@
     width:100%; position:relative;
   }
   .letter-heading{font-family:var(--serif); font-size:clamp(19px, 5.6vw, 24px); text-align:center; margin:0 0 16px; color:var(--kraft-dark); line-height:1.25;}
+  /* Scrollable letter body — the paragraphs live in their own capped
+     box with a visible, on-theme scrollbar instead of stretching the
+     whole card (and the whole page) to fit all the text. Heading,
+     signature, and the flower photo stay outside this box so they're
+     always visible. */
+  .letter-body{
+    max-height:44vh;   /* fallback for browsers without dvh */
+    max-height:44dvh;  /* address-bar-aware height on iPhone Safari */
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    padding-right:10px;
+    margin-right:-10px;
+    scrollbar-width:thin;
+    scrollbar-color: var(--kraft) rgba(61,55,44,0.12);
+  }
+  .letter-body::-webkit-scrollbar{width:6px;}
+  .letter-body::-webkit-scrollbar-track{background:rgba(61,55,44,0.12); border-radius:6px; margin:2px 0;}
+  .letter-body::-webkit-scrollbar-thumb{background:var(--kraft); border-radius:6px;}
+  .letter-body::-webkit-scrollbar-thumb:hover{background:var(--kraft-dark);}
   .letter-body p{font-size:clamp(13.5px, 3.7vw, 14.5px); line-height:1.7; margin:0 0 12px; color:var(--ink); word-wrap:break-word; overflow-wrap:break-word;}
   .letter-sign{font-family:var(--hand); font-size:22px; color:var(--kraft-dark); margin-top:10px;}
 
+  .flower-row{
+    display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+    margin:22px 0 0;
+  }
   .flower-card{
-    width:130px; margin:22px auto 0;
+    width:110px; margin:0;
     background:var(--paper-2); border-radius:8px; padding:8px 8px 12px;
     box-shadow:0 6px 16px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(61,55,44,0.08);
   }
@@ -410,7 +514,8 @@
   }
   @media (max-width:340px){
     .letter-paper{padding:22px 14px 20px 16px;}
-    .flower-card{width:105px;}
+    .flower-card{width:88px;}
+    .flower-row{gap:8px;}
   }
 </style>
 </head>
@@ -606,6 +711,51 @@
     </div>
   </section>
 
+  <!-- ============ SLIDE 3: SAME SKY, DIFFERENT WINDOW (distance) ============ -->
+  <section class="slide" id="slide-3">
+    <div class="eyebrow">Different Cities</div>
+    <h2 class="title">Same Sky, <em>Different</em> Window</h2>
+    <div class="distance-card">
+      <div class="sky-path">
+        <svg viewBox="0 0 440 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M28,66 Q220,6 412,66" fill="none"
+                style="stroke:var(--kraft); stroke-width:2; stroke-dasharray:6 7; opacity:0.75;"/>
+          <circle cx="28" cy="66" r="6" style="fill:var(--rose);"/>
+          <circle cx="412" cy="66" r="6" style="fill:var(--rose);"/>
+          <text x="220" y="32" text-anchor="middle" font-size="22">✈️</text>
+        </svg>
+        <div class="city-row">
+          <span class="city-label">Your City</span>
+          <span class="city-label">My City</span>
+        </div>
+      </div>
+      <div class="distance-number">countless km</div>
+      <p class="distance-sub">apart right now — but who's counting? (I am.)</p>
+      <div class="moon-line">🌙 same moon, two windows 🌙</div>
+      <div class="polaroids">
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img src="ryry.jpg" alt=""
+                 onerror="if(this.src.indexOf('.png')===-1){this.src='photo-1.png';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}">
+            <div class="pl-fallback" style="display:none;">add<br>photo-1.jpg</div>
+          </div>
+          <div class="polaroid-cap">You💋</div>
+        </div>
+        <div class="polaroid">
+          <div class="polaroid-photo">
+            <img src="Elijah.jpg" alt=""
+                 onerror="if(this.src.indexOf('.png')===-1){this.src='photo-2.png';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}">
+            <div class="pl-fallback" style="display:none;">add<br>photo-2.jpg</div>
+          </div>
+          <div class="polaroid-cap">Me💞</div>
+        </div>
+      </div>
+    </div>
+    <div class="board-footer" style="margin-top:18px;">
+      <button class="cta" data-next>Read my letter →</button>
+    </div>
+  </section>
+
   <!-- ============ SLIDE 4: LETTER + FLOWER CARD ============ -->
   <section class="slide" id="slide-4">
     <div class="eyebrow">One Last Thing</div>
@@ -613,20 +763,40 @@
       <div class="letter-paper">
         <h3 class="letter-heading">Dear Lovee Kreesha Gaevryll,</h3>
         <div class="letter-body">
-          <p>Hi baby kamusta mn? I know natug paka but I have to tell you something. Five months may not seem like a very long time, but when I look back at everything we shared, it feels like we already created so many memories together. Through the good days, the quiet days, the misunderstandings, and the moments when we simply missed each other, I'm still grateful that I get to call you mine since I'm officially yours and your officially mine.</p>
-          <p>There are days when I wish I could simply be beside you, hold your hand, hug you after a long day, or just sit next to you without needing a screen or a call between us. Sometimes the distance makes me miss you more than I know how to explain, but somehow, loving you makes every bit of it worth it.</p>
-          <p>I'm proud of us, and I'm grateful for you every single day. One day, I am sure that we can look back at these days and say, "We really made it through all of that." Until then, I'll keep loving you from here, supporting you, understanding you, and patiently waiting for the day when I can finally be beside you instead of missing you through a screen</p>
+          <p>Hi baby kamusta mn? I know natug paka but I have to tell you something. Five months may not seem like a very long time, but when I look back at everything we shared, it feels like we already created so many memories together. Through the good days, the quiet days, the misunderstandings, and the moments when we simply missed each other, I'm still grateful that I get to call you mine since I'm officially yours and your officially mine.🥰</p>
+          <p>There are days when I wish I could simply be beside you, hold your hand, hug you after a long day,Kissing you soo much, Protecting from all risk and dangers and To Take Care of You or just sit next to you without needing a screen or a call between us. Sometimes the distance makes me miss you more than I know how to explain, but somehow, loving you makes every bit of it worth it.🥺</p>
+          <p>As my experience being with you my baby, I was soo inlove to the point I need to get myself better in terms of character to be a hubby material and to get better in our wealth my baby.You didn't really know how much I cried and get anxious whenever I think about the time we're apart. Cause I am clingy and submissive babee to the point I understand our boundaries because we have school.💖 </p>
+          <p>Sometimes I tend to overthink about those situations nga if masakpan ta and if diko sugtan imong parents, I would hold your hand babee and layas ta babee cuz I rather pick you over sa imong parents because I know everything as you overshare to me. But I'm here my baby, and don't  worry babby I'm not going anywhere. I would still check on you every single day if your not around achuchu🥹</p>
+          <p>I'm proud of us, and I'm grateful for you every single day. One day, I am sure that we can look back at these days and say, "We really made it through all of that." Until then, I'll keep loving you from here, supporting you, understanding you, and patiently waiting for the day when I can finally be beside you instead of missing you through a screen. I keep manifesting that to make the time flies so fast that your are here in my arms once again.🥺</p>
           <p>"Baby, Dali Rani ang Panahon" I want you to know that you are loved beyond measure, and no amount of distance could ever change how much you mean to me. Here's to us, to everything we've overcome, and to all the moments we have yet to experience together. I Miss You So Much My Baby Ryry and I Love You So So Muchh My Babyy Kreesha Gaevryll Forever and Always Mwuaahhh🥹😘</p>
         </div>
-        <div class="letter-sign">"No matter where life leads, my heart will remain with you." — Elijah</div>
+        <div class="letter-sign">"No matter where life leads, my heart will remain with you." — From your's truly Elijah🥹😘🥰</div>
 
-        <div class="flower-card">
-          <div class="flower-photo">
-            <img src="bouquet.jpg" alt=""
-                 onerror="if(this.src.indexOf('.png')===-1){this.src='flower.png';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}">
-            <div class="flower-fallback" style="display:none;">🌸</div>
+        <div class="flower-row">
+          <div class="flower-card">
+            <div class="flower-photo">
+              <img src="flower1.jpg" alt=""
+                   onerror="if(this.src.indexOf('.png')===-1){this.src='flower.png';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}">
+              <div class="flower-fallback" style="display:none;">🌸</div>
+            </div>
+            <div class="cap">for you 🌸</div>
           </div>
-          <div class="cap">for you 🌸</div>
+          <div class="flower-card">
+            <div class="flower-photo">
+              <img src="flower2.jpg" alt=""
+                   onerror="if(this.src.indexOf('.png')===-1){this.src='bouquet2.png';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}">
+              <div class="flower-fallback" style="display:none;">🌷</div>
+            </div>
+            <div class="cap">my love 🌷</div>
+          </div>
+          <div class="flower-card">
+            <div class="flower-photo">
+              <img src="flower3.jpg" alt=""
+                   onerror="if(this.src.indexOf('.png')===-1){this.src='bouquet3.png';}else{this.style.display='none'; this.nextElementSibling.style.display='flex';}">
+              <div class="flower-fallback" style="display:none;">🌹</div>
+            </div>
+            <div class="cap">always 🌹</div>
+          </div>
         </div>
       </div>
     </div>
@@ -640,20 +810,10 @@
   <section class="slide" id="slide-5">
     <h2 class="glow-title">You Mean So Much To Me, My Baby Ryry 🌸</h2>
     <div class="hug-frame">
-      <!--
-        iOS Safari pauses animated GIFs when the phone is in Low Power
-        Mode, freezing them on the first frame. A short looping video
-        isn't affected by that, so we try hug.mp4 first and only fall
-        back to hug.gif if no video file is found. Convert your GIF to
-        hug.mp4 (e.g. at ezgif.com/gif-to-mp4) and drop it in the same
-        folder as this HTML file for a reliably-animated result.
-      -->
-      <video id="hug-video" autoplay loop muted playsinline webkit-playsinline="true" disableRemotePlayback>
-        <source src="hug.mp4" type="video/mp4">
-        <source src="hug.webm" type="video/webm">
-      </video>
-      <img id="hug-gif" src="hug.gif" alt="" style="display:none;">
-      <div class="ph-fallback" style="display:none;">add<br>hug.mp4 (or hug.gif)</div>
+      <!-- Simplified: shows hug.gif directly. Put "hug.gif" in the
+           same folder as this HTML file. -->
+      <img id="hug-gif" src="hug.gif" alt="">
+      <div class="ph-fallback" style="display:none;">add<br>hug.gif</div>
     </div>
     <div class="closing-text">
       <p>You deserve appreciation not just today but every day.</p>
@@ -669,6 +829,7 @@
   <button class="dot" data-goto="1" aria-label="Slide 2"></button>
   <button class="dot" data-goto="2" aria-label="Slide 3"></button>
   <button class="dot" data-goto="3" aria-label="Slide 4"></button>
+  <button class="dot" data-goto="4" aria-label="Slide 5"></button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -750,22 +911,9 @@ musicToggle.addEventListener('click', () => {
   }
 });
 
-// --- Closing hug clip: video first, GIF fallback, then placeholder ---
-// If hug.mp4/hug.webm aren't present (or can't play), fall back to the
-// GIF; if that's missing too, show the "add file" placeholder text.
-const hugVideo = document.getElementById('hug-video');
+// --- Closing hug gif: fall back to placeholder text if missing ---
 const hugGif = document.getElementById('hug-gif');
-if (hugVideo && hugGif) {
-  const fallbackToGif = () => {
-    hugVideo.style.display = 'none';
-    hugGif.style.display = 'block';
-  };
-  hugVideo.addEventListener('error', fallbackToGif);
-  // Some browsers silently fail to autoplay without firing 'error';
-  // if playback never actually starts shortly after load, fall back too.
-  hugVideo.addEventListener('loadeddata', () => {
-    hugVideo.play().catch(fallbackToGif);
-  });
+if (hugGif) {
   hugGif.addEventListener('error', () => {
     hugGif.style.display = 'none';
     hugGif.nextElementSibling.style.display = 'flex';
